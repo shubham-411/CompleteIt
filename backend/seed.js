@@ -1,9 +1,15 @@
+const path = require('path');
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const User = require('./models/User');
 
 const seedDB = async () => {
-    await mongoose.connect(process.env.MONGO_URI);
+    const dbUri = process.env.MONGO_URI || process.env.MONGO_ATLAS_URI;
+    if (!dbUri) {
+        console.error('Error: No connection URI found in backend/.env. Please define MONGO_URI or MONGO_ATLAS_URI.');
+        process.exit(1);
+    }
+    await mongoose.connect(dbUri);
     console.log('Connected to DB');
 
     await User.deleteMany();

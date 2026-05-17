@@ -24,6 +24,13 @@ export const AuthProvider = ({ children }) => {
     setUser(data);
   };
 
+  const syncEntra = async (entraData) => {
+    const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/sync-entra`, entraData);
+    localStorage.setItem('portalUser', JSON.stringify(data));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+    setUser(data);
+  };
+
   const logout = () => {
     localStorage.removeItem('portalUser');
     delete axios.defaults.headers.common['Authorization'];
@@ -31,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, syncEntra, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

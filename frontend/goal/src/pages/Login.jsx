@@ -1,14 +1,17 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowRight, Shield } from 'lucide-react';
 
 export default function Login() {
-  const { login } = useContext(AuthContext);
+  const { login, syncEntra } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showEntraModal, setShowEntraModal] = useState(false);
+  const [entraLoading, setEntraLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -25,22 +28,70 @@ export default function Login() {
     }
   };
 
+  const handleEntraSSO = async (profile) => {
+    setEntraLoading(true);
+    setError('');
+    try {
+      await syncEntra({
+        entraId: profile.entraId,
+        name: profile.name,
+        email: profile.email,
+        department: profile.department,
+        upnManagerEmail: profile.upnManagerEmail,
+        groups: profile.groups
+      });
+      setShowEntraModal(false);
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Entra ID SSO handshake failure.');
+    } finally {
+      setEntraLoading(false);
+    }
+  };
+
+  const entraProfiles = [
+    {
+      entraId: 'entra-user-001',
+      name: 'Jane Vance (Employee)',
+      email: 'jane.vance@company.com',
+      department: 'Engineering',
+      upnManagerEmail: 'manager@company.com',
+      groups: ['Entra_Employees'],
+      desc: 'Role: Employee (Mapped from Group: Entra_Employees)'
+    },
+    {
+      entraId: 'entra-user-002',
+      name: 'Marcus Sterling (Manager)',
+      email: 'marcus.sterling@company.com',
+      department: 'Engineering',
+      upnManagerEmail: 'admin@company.com',
+      groups: ['Entra_Managers', 'Entra_Employees'],
+      desc: 'Role: Manager (Mapped from Group: Entra_Managers)'
+    },
+    {
+      entraId: 'entra-user-003',
+      name: 'Claire Redfield (HR Admin)',
+      email: 'claire.redfield@company.com',
+      department: 'HR',
+      upnManagerEmail: null,
+      groups: ['Entra_Admins', 'Entra_Employees'],
+      desc: 'Role: Admin (Mapped from Group: Entra_Admins)'
+    }
+  ];
+
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-slate-950 overflow-hidden px-4 font-sans">
-      {/* Dynamic Background Glow Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none animate-pulse duration-[6000ms]" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none animate-pulse duration-[8000ms]" />
 
       <div className="max-w-md w-full relative z-10 animate-slide-up">
-        {/* Portal Header Accent */}
         <div className="flex flex-col items-center mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight font-heading">
             CompleteIt
           </h1>
         </div>
 
-        {/* Auth Box Container */}
-        <div className="glass-card-dark rounded-3xl p-8 shadow-2xl relative overflow-hidden border border-slate-800">
+        <div className="glass-card-dark rounded-3xl p-8 shadow-2xl relative overflow-hidden border border-slate-800 bg-slate-900/40 backdrop-blur-md">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-white tracking-tight">Welcome Back</h2>
             <p className="text-sm text-slate-400 mt-1">Authenticate to synchronize your quarterly performance objectives.</p>
@@ -106,27 +157,97 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Quick Demo Credentials Footer */}
+          <div className="mt-4">
+            <button
+              onClick={() => setShowEntraModal(true)}
+              className="w-full bg-slate-800 hover:bg-slate-750 text-white font-bold py-3 px-4 rounded-xl border border-slate-700 transition duration-200 flex items-center justify-center gap-2.5 text-xs shadow-sm cursor-pointer"
+            >
+              <Shield size={16} className="text-blue-400" />
+              <span>Sign in with Microsoft Entra ID</span>
+            </button>
+          </div>
+
           <div className="mt-8 pt-6 border-t border-slate-900 text-center">
             <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500 block mb-2">Quick Reference Sign-in Accounts</span>
             <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-400">
-              <div className="bg-slate-900/50 p-2 rounded-lg border border-slate-900">
+              <button 
+                onClick={() => { setEmail('emp@company.com'); setPassword('password123'); }}
+                className="cursor-pointer bg-slate-900/50 hover:bg-slate-900 p-2 rounded-lg border border-slate-900 text-left"
+              >
                 <span className="font-semibold text-slate-300 block">Employee</span>
                 emp@company.com
-              </div>
-              <div className="bg-slate-900/50 p-2 rounded-lg border border-slate-900">
+              </button>
+              <button 
+                onClick={() => { setEmail('manager@company.com'); setPassword('password123'); }}
+                className="cursor-pointer bg-slate-900/50 hover:bg-slate-900 p-2 rounded-lg border border-slate-900 text-left"
+              >
                 <span className="font-semibold text-slate-300 block">Manager</span>
                 manager@company.com
-              </div>
-              <div className="bg-slate-900/50 p-2 rounded-lg border border-slate-900">
+              </button>
+              <button 
+                onClick={() => { setEmail('admin@company.com'); setPassword('password123'); }}
+                className="cursor-pointer bg-slate-900/50 hover:bg-slate-900 p-2 rounded-lg border border-slate-900 text-left"
+              >
                 <span className="font-semibold text-slate-300 block">Administrator</span>
                 admin@company.com
-              </div>
+              </button>
             </div>
-            <span className="text-[9px] text-slate-500 mt-2 block italic">All accounts password: password123</span>
+            <span className="text-[9px] text-slate-500 mt-2.5 block italic">All accounts password: password123</span>
           </div>
         </div>
       </div>
+
+      {showEntraModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center px-4 animate-fade-in">
+          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative">
+            
+            <div className="bg-blue-600 p-4.5 text-white flex items-center gap-3">
+              <Shield size={20} className="fill-white/20 text-white" />
+              <div>
+                <h3 className="font-bold text-sm">Microsoft Entra ID</h3>
+                <p className="text-[10px] text-blue-100 font-sans">Simulating Single Sign-On (SSO) OAuth Consent</p>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-slate-300 leading-relaxed">
+                CompleteIt is requesting permission to authenticate you and sync your corporate reporting lines and security group assignments.
+              </p>
+
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Select Synced Identity Profile:</span>
+                
+                {entraProfiles.map((profile, i) => (
+                  <button
+                    key={i}
+                    disabled={entraLoading}
+                    onClick={() => handleEntraSSO(profile)}
+                    className="cursor-pointer w-full p-4 bg-slate-955 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/50 rounded-xl text-left transition flex items-start gap-3.5 group"
+                  >
+                    <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition duration-200">
+                      <Mail size={16} />
+                    </div>
+                    <div>
+                      <span className="block font-bold text-xs text-white group-hover:text-blue-400 transition">{profile.name}</span>
+                      <span className="block text-[10px] text-slate-400 mt-0.5">{profile.email}</span>
+                      <span className="block text-[9px] text-slate-500 italic mt-1">{profile.desc}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-slate-950 p-4 border-t border-slate-850 flex justify-end gap-2.5">
+              <button
+                onClick={() => setShowEntraModal(false)}
+                className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl text-xs transition duration-200"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
