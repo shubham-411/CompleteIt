@@ -372,7 +372,7 @@ export default function EmployeeDashboard() {
           </div>
 
           {/* Filtering Badge Buttons */}
-          <div className="flex bg-slate-100 p-1 rounded-xl shrink-0 gap-1 self-start md:self-auto">
+          <div className="flex bg-slate-100 p-1 rounded-xl shrink-0 gap-1 overflow-x-auto max-w-full scrollbar-none self-start md:self-auto">
             {['All', 'Draft', 'Pending Approval', 'Approved', 'Rejected'].map(tab => (
               <button
                 key={tab}

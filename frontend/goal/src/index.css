@@ -59,6 +59,14 @@
                 linear-gradient(135deg, #10b981, #3b82f6) border-box;
     border: 1px solid transparent;
   }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Custom premium scrollbar */

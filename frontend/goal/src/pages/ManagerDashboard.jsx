@@ -210,7 +210,7 @@ export default function ManagerDashboard() {
             </div>
           </div>
 
-          <div className="flex bg-slate-100 p-1 rounded-xl shrink-0 gap-1 self-start lg:self-auto">
+          <div className="flex bg-slate-100 p-1 rounded-xl shrink-0 gap-1 overflow-x-auto max-w-full scrollbar-none self-start lg:self-auto">
             {['All', 'Pending Approval', 'Approved', 'Rejected'].map(filter => (
               <button
                 key={filter}
