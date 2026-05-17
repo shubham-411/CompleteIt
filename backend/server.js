@@ -21,6 +21,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/escalations', escalationRoutes);
+app.get("/", (req, res) => {
+  res.send("Backend Running Successfully");
+});
 
 // Shared Error Pipeline Fallback
 app.use((err, req, res, next) => {
